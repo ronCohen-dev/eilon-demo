@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .visualization {
+            flex: 3;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f9f9f9;
+        }
+        .controls {
+            flex: 1;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .function-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .function-button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .function-button:hover {
+            background-color: #45a049;
+        }
+        .input-container {
+            margin-bottom: 20px;
+        }
+        .input-container label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .result {
+            font-size: 20px;
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body>
+<h1>Function Calculator</h1>
+
+<div class="container">
+    <div class="visualization" id="visualization">
+        <p>Select a function to see its visualization</p>
+    </div>
+
+    <div class="controls">
+        <div class="function-buttons" id="function-buttons">
+            <button class="function-button" data-function="sin">sin</button>
+            <button class="function-button" data-function="cos">cos</button>
+            <button class="function-button" data-function="tan">tan</button>
+            <button class="function-button" data-function="log">log</button>
+            <button class="function-button" data-function="sqrt">√</button>
+        </div>
+
+        <div class="input-container">
+            <label for="value-input">Enter value:</label>
+            <input type="number" id="value-input" class="input-field" step="any">
+            <button id="calculate-button" class="function-button">Calculate</button>
+        </div>
+
+        <div class="result" id="result">
+            Result will appear here
+        </div>
+    </div>
+</div>
+
+<script>
+    // Variables to store current function
+    let currentFunction = null;
+
+    // Add event listeners to function buttons
+    document.querySelectorAll('.function-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const functionName = this.getAttribute('data-function');
+            if (functionName) {
+                currentFunction = functionName;
+                loadFunctionVisualization(functionName);
+                document.querySelectorAll('.function-button').forEach(btn => {
+                    btn.style.backgroundColor = '#4CAF50';
+                });
+                this.style.backgroundColor = '#2E8B57';
+            }
+        });
+    });
+
+    // Add event listener to calculate button
+    document.getElementById('calculate-button').addEventListener('click', function() {
+        calculateResult();
+    });
+
+    // Add event listener for Enter key on input field
+    document.getElementById('value-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            calculateResult();
+        }
+    });
+
+    // Function to load visualization
+    function loadFunctionVisualization(functionName) {
+        const visualizationDiv = document.getElementById('visualization');
+        visualizationDiv.innerHTML = `<img src="/api/calculator/image/${functionName}" alt="${functionName} function visualization">`;
+    }
+
+    // Function to calculate result
+    function calculateResult() {
+        const valueInput = document.getElementById('value-input');
+        const resultDiv = document.getElementById('result');
+
+        if (!currentFunction) {
+            resultDiv.textContent = 'Please select a function first';
+            return;
+        }
+
+        if (!valueInput.value) {
+            resultDiv.textContent = 'Please enter a value';
+            return;
+        }
+
+        const value = parseFloat(valueInput.value);
+
+            fetch(`/api/calculator/calculate/${currentFunction}?value=${value}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.textContent = `Error: ${data.error}`;
+                } else {
+                    resultDiv.textContent = `${currentFunction}(${value}) = ${data.result}`;
+                }
+            })
+            .catch(error => {
+                resultDiv.textContent = `Error: ${error.message}`;
+            });
+    }
+</script>
+</body>
+</html>

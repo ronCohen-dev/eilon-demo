@@ -1,27 +1,14 @@
-#version: '3.8'
-#
-#services:
-#  javafx-calculator:
-#    build: src/main/resources
-#    container_name: javafx_calculator
-#    environment:
-#      - DISPLAY=${DISPLAY}
-#    volumes:
-#      - /tmp/.X11-unix:/tmp/.X11-unix  # Allows GUI apps from Docker
-#    network_mode: host  # Allows network communication (optional)
-#    tty: true  # Keeps the container running
-
-
 version: '3.8'
 
 services:
   javafx-calculator:
     build:
-      context: .  # This refers to the current directory, where Dockerfile is located
+      context: .
     container_name: javafx_calculator
     environment:
       - DISPLAY=${DISPLAY}
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix  # Allows GUI apps from Docker
-    network_mode: host  # Allows network communication (optional)
-    tty: true  # Keeps the container running
+      - /tmp/.X11-unix:/tmp/.X11-unix  # For GUI support (JavaFX)
+    ports:
+      - "8080:8080"  # Map container's port 8080 to host
+    tty: true
